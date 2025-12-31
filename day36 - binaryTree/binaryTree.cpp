@@ -314,6 +314,102 @@ int LCA(Node* root, int n1, int n2) {
     return lca;
 }
 
+Node* LCA2(Node* root, int n1, int n2) {    //TC=O(n), SC=O(1)
+    if(root == NULL) {
+        return NULL;
+    }
+
+    if(root->data == n1 || root->data == n2) {
+        return root;
+    }
+
+    Node* leftLCA = LCA2(root->left, n1, n2);
+    Node* rightLCA = LCA2(root->right, n1, n2);
+
+    if(leftLCA != NULL && rightLCA != NULL) {
+        return root;
+    }
+
+    return leftLCA == NULL ? rightLCA : leftLCA;
+}
+
+int dist(Node* root, int n) {
+    if(root == NULL) {
+        return -1;
+    }
+
+    if(root->data == n) {
+        return 0;
+    }
+
+    int leftDist = dist(root->left, n);
+    if(leftDist != -1) {
+        return leftDist + 1;
+    }
+
+    int rightDist = dist(root->right, n);
+    if(rightDist != -1) {
+        return rightDist + 1;
+    }
+
+    return -1;
+}
+
+int minDist(Node* root, int n1, int n2) {   //TC=O(n), SC=O(1)
+    Node* lca = LCA2(root, n1, n2);
+
+    int dist1 = dist(lca, n1);
+    int dist2 = dist(lca, n2);
+
+    return dist1 + dist2;
+}
+
+int KthAncestor(Node* root, int node, int k) {  //TC=O(n)
+    if(root == NULL) {
+        return -1;
+    }
+
+    if(root->data == node) {
+        return 0;
+    }
+
+    int leftDist = KthAncestor(root->left, node, k);
+    int rightDist = KthAncestor(root->right, node, k);
+
+    if(leftDist == -1 && rightDist == -1) {
+        return -1;
+    }
+
+    int validVal = leftDist == -1 ? rightDist : leftDist;
+    if(validVal+1 == k) {
+        cout<<"Kth Ancestor = "<<root->data<<endl;
+    }
+
+    return validVal+1;
+}
+
+int transform(Node* root) { //TC=O(n)
+    if(root == NULL) {
+        return 0;
+    }
+
+    int leftOld = transform(root->left);
+    int rightOld = transform(root->right);
+    int currOld = root->data;
+
+    root->data = leftOld + rightOld;
+
+    if(root->left != NULL) {
+        root->data += root->left->data;
+    }
+    
+    if(root->right != NULL) {
+        root->data += root->right->data;
+    }
+
+    return currOld;
+}
+
 int main() {
     vector<int> nodesData = {1, 2, 4, -1, -1, 5, -1, -1, 3, -1, 6, -1, -1};
 
@@ -328,18 +424,23 @@ int main() {
     cout<<"PreOrderTraversal: ";
     preOrderTraversal(root);
     cout<<endl;
+
     cout<<"InOrderTraversal: ";
     inOrderTraversal(root);
     cout<<endl;
+
     cout<<"PostOrderTraversal: ";
     postOrderTraversal(root);
     cout<<endl;
+
     cout<<"LevelOrderTraversal: ";
     levelOrderTraversal(root);
     cout<<endl;
+
     cout<<"LevelOrderTraversal2: "<<endl;
     levelOrderTraversal2(root);
     cout<<endl;
+
     cout<<"Height = "<<height(root)<<endl;
     cout<<"Count = "<<count(root)<<endl;
     cout<<"Sum = "<<sum(root)<<endl;
@@ -347,10 +448,18 @@ int main() {
     cout<<"Diameter = "<<diameter2(root).first<<endl;
     cout<<"Is Subtree = "<<isSubtree(root, subRoot)<<endl;
     topView(root);
+
     cout<<"Kth Level Nodes : ";
     kthLevel(root, 3);
 
     cout<<"LCA = "<<LCA(root, 4, 5)<<endl;
+    cout<<"LCA2 = "<<LCA2(root, 4, 5)->data<<endl;
+    cout<<"Min Distance = "<<minDist(root, 4, 6)<<endl;
+    
+    KthAncestor(root, 6, 1);
+    
+    transform(root);
+    levelOrderTraversal2(root);
 
     return 0;
 }
