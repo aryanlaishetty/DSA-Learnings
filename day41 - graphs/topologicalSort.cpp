@@ -2,6 +2,7 @@
 #include<vector>
 #include<list>
 #include<queue>
+#include<stack>
 using namespace std;
 
 class Graph {
@@ -33,30 +34,35 @@ public:
         }
     }
 
-    void printallPathsHelper(int src, int dest, vector<bool> &visited, string &path) {  //TC = O(V + E)
-        if(src == dest) {
-            cout<<path<<dest<<endl;
-            return;
-        }
-
+    void topoHelper(int src, vector<bool> &visited, stack<int> &s) {    //TC = O(V+E)
         visited[src] = true;
-        path += to_string(src);
 
-        list<int> neighbours = l[src];
-        for(int v : neighbours) {
+        list<int> neighbors = l[src];
+        for(int v : neighbors) {
             if(!visited[v]) {
-                printallPathsHelper(v, dest, visited, path);
+                topoHelper(v, visited, s);
             }
         }
 
-        visited[src] = false;
-        path.pop_back();
+        s.push(src);    //dependent node will be pushed into stack first
     }
 
-    void printallPaths(int src, int dest) {
+    void topologicalSort() {
         vector<bool> visited(V, false);
-        string path = "";
-        printallPathsHelper(src, dest, visited, path); 
+        stack<int> s;
+
+        for(int i=0; i<V; i++) {
+            if(!visited[i]) {
+                topoHelper(i, visited, s);
+            }
+        }
+
+        //print topological sort
+        while(!s.empty()) {
+            cout<<s.top()<<" ";
+            s.pop();
+        }
+        cout<<endl;
     }
 
     
@@ -64,17 +70,17 @@ public:
 };
 
 int main() {
+    //DAG
     Graph graph(6, false);
 
     graph.addEdge(5, 0);
-    graph.addEdge(5, 2);
-    graph.addEdge(0, 3);
-    graph.addEdge(2, 3);
     graph.addEdge(4, 0);
-    graph.addEdge(0, 3);
+    graph.addEdge(5, 2);
+    graph.addEdge(2, 3);
     graph.addEdge(3, 1);
+    graph.addEdge(4, 1);
 
-    graph.printallPaths(5, 1);
+    graph.topologicalSort();
 
     return 0;
 }
